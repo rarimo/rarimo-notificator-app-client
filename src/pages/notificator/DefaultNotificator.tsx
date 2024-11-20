@@ -12,6 +12,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useCallback } from 'react'
@@ -25,6 +26,8 @@ import {
   NotificationTarget,
   notificationTargetToString,
 } from '../../api/firebase/modules/FirebaseModule'
+import { BusEvents } from '../../enums'
+import { bus } from '../../helpers'
 
 export const enum ProjectType {
   RariMe,
@@ -35,6 +38,7 @@ type Props = {
   topic: string[]
   type: string[]
   project: ProjectType
+  logo: string
 }
 
 enum FieldNames {
@@ -43,6 +47,7 @@ enum FieldNames {
   Header = 'header',
   Description = 'description',
   Target = 'target',
+  Password = 'password',
 }
 
 interface DynamicFieldDefinition {
@@ -59,6 +64,7 @@ interface FormData {
   [FieldNames.Description]: string
   [FieldNames.Target]: NotificationTarget
   dynamicFields: { [key: string]: string | Array<string> }
+  [FieldNames.Password]: string
 }
 
 const DEFAULT_VALUES: FormData = {
@@ -68,9 +74,10 @@ const DEFAULT_VALUES: FormData = {
   [FieldNames.Description]: '',
   [FieldNames.Target]: NotificationTarget.AndroidAndIOS,
   dynamicFields: {},
+  [FieldNames.Password]: '',
 }
 
-export default function DefaultNotificator({ topic, type, project }: Props) {
+export default function DefaultNotificator({ topic, type, project, logo }: Props) {
   const {
     handleSubmit,
     control,
@@ -129,15 +136,25 @@ export default function DefaultNotificator({ topic, type, project }: Props) {
         switch (project) {
           case ProjectType.RariMe:
             await firebaseState.sendNotificationRarime(request)
+            bus.emit(BusEvents.success, {
+              message: 'Notification sent to Rarime',
+            })
             break
           case ProjectType.UnitedSpace:
             await firebaseState.sendNotificationUnitedSpace(request)
+            bus.emit(BusEvents.success, {
+              message: 'Notification sent to United Space',
+            })
             break
           default:
-            throw new Error('Unknown project type: ' + project)
+            bus.emit(BusEvents.error, {
+              message: 'Unknown project',
+            })
         }
       } catch {
-        throw SyntaxError()
+        bus.emit(BusEvents.error, {
+          message: 'Smth went wrong',
+        })
       }
     },
     [project],
@@ -154,24 +171,45 @@ export default function DefaultNotificator({ topic, type, project }: Props) {
           borderRadius: 2,
         }}
       >
-        <Typography
-          variant='h5'
-          component='div'
-          textAlign='center'
-          gutterBottom
-          sx={{ fontWeight: 'bold', color: 'primary.main' }}
-        >
-          Create a new notification
-        </Typography>
-        <Typography
-          variant='body2'
-          component='div'
-          textAlign='center'
-          gutterBottom
-          sx={{ marginBottom: 3, color: 'text.secondary' }}
-        >
-          Fill in the details below to create your notification
-        </Typography>
+        <Stack direction='row' alignItems='center' spacing={2} mb={3}>
+          {/* Image on the Left */}
+          <Box
+            component='img'
+            src={logo}
+            alt='rarime'
+            sx={{
+              width: 50,
+              height: 50,
+              objectFit: 'contain',
+            }}
+          />
+
+          {/* Vertical Stack for Header and Description */}
+          <Stack direction='column' spacing={1}>
+            {/* Header Text */}
+            <Typography
+              variant='h5'
+              component='div'
+              textAlign='left'
+              gutterBottom
+              sx={{ fontWeight: 'bold', color: 'primary.main' }}
+            >
+              Create a new notification
+            </Typography>
+
+            {/* Description Text */}
+            <Typography
+              variant='body2'
+              component='div'
+              textAlign='left'
+              gutterBottom
+              sx={{ color: 'text.secondary' }}
+            >
+              Fill in the details below to create your notification
+            </Typography>
+          </Stack>
+        </Stack>
+
         <Stack spacing={3}>
           {/* Topic and Type Autocomplete */}
           <Stack
@@ -310,7 +348,6 @@ export default function DefaultNotificator({ topic, type, project }: Props) {
             <Stack spacing={2}>
               {dynamicFields.map(fieldDef => {
                 if (fieldDef.type === 'string[]') {
-                  // Render checkboxes for string[] fields
                   return (
                     <Controller
                       key={fieldDef.name}
@@ -398,26 +435,52 @@ export default function DefaultNotificator({ topic, type, project }: Props) {
                   onChange={e => field.onChange(e.target.value)}
                   value={field.value || ''}
                 >
-                  <FormControlLabel
-                    value={NotificationTarget.AndroidAndIOS}
-                    control={<Radio />}
-                    label={NotificationTarget.AndroidAndIOS}
-                    disabled={isSubmitting}
-                  />
-                  <FormControlLabel
-                    value={NotificationTarget.OnlyAndroid}
-                    control={<Radio />}
-                    label={NotificationTarget.OnlyAndroid}
-                    disabled={isSubmitting}
-                  />
-                  <FormControlLabel
-                    value={NotificationTarget.OnlyIOS}
-                    control={<Radio />}
-                    label={NotificationTarget.OnlyIOS}
-                    disabled={isSubmitting}
-                  />
+                  <Stack direction='row'>
+                    <FormControlLabel
+                      value={NotificationTarget.AndroidAndIOS}
+                      control={<Radio />}
+                      label={NotificationTarget.AndroidAndIOS}
+                      disabled={isSubmitting}
+                    />
+                    <FormControlLabel
+                      value={NotificationTarget.OnlyAndroid}
+                      control={<Radio />}
+                      label={NotificationTarget.OnlyAndroid}
+                      disabled={isSubmitting}
+                    />
+                    <FormControlLabel
+                      value={NotificationTarget.OnlyIOS}
+                      control={<Radio />}
+                      label={NotificationTarget.OnlyIOS}
+                      disabled={isSubmitting}
+                    />
+                  </Stack>
                 </RadioGroup>
                 <FormHelperText>{errors[FieldNames.Target]?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+
+          <Controller
+            name={FieldNames.Password}
+            control={control}
+            defaultValue=''
+            rules={{
+              required: 'Password is required',
+              validate: value => value === 'XrNCy9trSm8A' || 'You must enter CORRECT password',
+            }}
+            render={({ field }) => (
+              <FormControl fullWidth error={Boolean(errors[FieldNames.Password])}>
+                <TextField
+                  {...field}
+                  id='password'
+                  label='password'
+                  variant='outlined'
+                  fullWidth
+                  disabled={isSubmitting}
+                  error={Boolean(errors[FieldNames.Password])}
+                  helperText={errors[FieldNames.Password]?.message}
+                />
               </FormControl>
             )}
           />

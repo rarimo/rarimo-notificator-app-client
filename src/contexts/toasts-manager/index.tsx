@@ -112,7 +112,7 @@ function ToastsManagerController({ children }: PropsWithChildren) {
 export default function ToastsManager({ children }: { children: ReactElement }) {
   return (
     <SnackbarProvider
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       autoHideDuration={STATUS_MESSAGE_AUTO_HIDE_DURATION}
       Components={{
         defaultToast: DefaultToast,

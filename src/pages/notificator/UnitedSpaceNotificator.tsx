@@ -1,5 +1,4 @@
 import { Stack } from '@mui/material'
-import Box from '@mui/material/Box'
 
 import DefaultNotificator, { ProjectType } from '@/pages/notificator/DefaultNotificator'
 
@@ -11,20 +10,8 @@ export default function UnitedSpaceNotificator() {
   const project = ProjectType.UnitedSpace
 
   return (
-    <Stack alignItems='center' justifyContent='center'>
-      <Box
-        component='img'
-        src={UnitedSpaceLogo}
-        paddingBottom={10}
-        paddingTop={10}
-        alt='rarime'
-        sx={{
-          width: 256, // Set a specific width
-          height: 256, // Set a specific height
-          objectFit: 'contain', // Ensures the image scales proportionally
-        }}
-      />
-      <DefaultNotificator topic={topics} type={types} project={project} />
+    <Stack alignItems='center' justifyContent='center' py={20}>
+      <DefaultNotificator topic={topics} type={types} project={project} logo={UnitedSpaceLogo} />
     </Stack>
   )
 }
