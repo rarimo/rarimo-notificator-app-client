@@ -5,7 +5,7 @@ import DefaultNotificator, { ProjectType } from '@/pages/notificator/DefaultNoti
 
 import RarimoLogo from './../../../public/rarimo.png'
 export default function RarimeNotificator() {
-  const topics = ['rarime-stage', 'rarime-stage', 'rarime-rewardable-stage', 'rarime-rewardable']
+  const topics = ['rarime', 'rarime-stage', 'rarime-rewardable-stage', 'rarime-rewardable']
   const types = ['info', 'rewardable', 'universal']
   const project = ProjectType.RariMe
 
