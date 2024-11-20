@@ -1,6 +1,6 @@
-FROM node:18-alpine as builder
+FROM node:20.18.0-alpine as builder
 RUN apk --no-cache --update --virtual build-dependencies add \
-    python \
+    python3 \
     make \
     g++
 

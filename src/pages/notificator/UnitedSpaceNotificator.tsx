@@ -7,7 +7,7 @@ import UnitedSpaceLogo from '../../../public/unitedSpace.png'
 
 export default function UnitedSpaceNotificator() {
   const topics = ['mokalake-stage']
-  const types = ['info', 'rewardable']
+  const types = ['info', 'rewardable', 'mokalake-rewardable-stage', 'mokalake-rewardable']
   const project = ProjectType.UnitedSpace
 
   return (
