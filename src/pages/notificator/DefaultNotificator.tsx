@@ -476,6 +476,7 @@ export default function DefaultNotificator({ topic, type, project, logo }: Props
                   id='password'
                   label='password'
                   variant='outlined'
+                  type='password'
                   fullWidth
                   disabled={isSubmitting}
                   error={Boolean(errors[FieldNames.Password])}
